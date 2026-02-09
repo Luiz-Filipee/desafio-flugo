@@ -2,7 +2,7 @@
 
 Uma aplicação **SaaS-style** para **gestão de colaboradores**, construída com foco em **UX moderna**, **componentização**, **boas práticas de frontend** e **integração em tempo real com Firebase**.
 
-🔗 **Projeto online (Vercel):** [https://SEU-LINK-DO-VERCEL-AQUI](https://SEU-LINK-DO-VERCEL-AQUI)
+🔗 **Projeto online (Vercel):** [https://desafio-flugo-uskz.vercel.app/](https://SEU-LINK-DO-VERCEL-AQUI)
 
 ---
 
@@ -179,7 +179,7 @@ http://localhost:5173
 
 O projeto foi buildado e publicado na **Vercel**.
 
-🔗 **Link:** [https://SEU-LINK-DO-VERCEL-AQUI](https://SEU-LINK-DO-VERCEL-AQUI)
+🔗 **Link:** [https://desafio-flugo-uskz.vercel.app/](https://SEU-LINK-DO-VERCEL-AQUI)
 
 ---
 
@@ -208,8 +208,8 @@ O projeto foi buildado e publicado na **Vercel**.
 **Luiz Filipe**
 Desenvolvedor Frontend & Software Engineer
 
-📎 LinkedIn: [https://linkedin.com/in/seu-link](https://linkedin.com/in/seu-link)
-📎 GitHub: [https://github.com/seu-usuario](https://github.com/seu-usuario)
+📎 LinkedIn: [https://linkedin.com/in/luizfilipemkato](https://linkedin.com/in/luizfilipemkato)
+📎 GitHub: [https://github.com/Luiz-Filipee](https://github.com/Luiz-Filipee)
 
 ---
 
