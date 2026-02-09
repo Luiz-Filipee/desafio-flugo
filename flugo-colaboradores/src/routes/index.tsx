@@ -8,6 +8,7 @@ export default function AppRoutes() {
       <Route path="/" element={<ListaColaboradores />} />
       <Route path="/colaboradores" element={<ListaColaboradores />} />
       <Route path="/colaboradores/novo" element={<CadastroColaborador />} />
+      <Route path="/colaboradores/editar/:id" element={<CadastroColaborador />} />
     </Routes>
   );
 }

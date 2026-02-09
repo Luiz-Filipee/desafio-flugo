@@ -10,9 +10,10 @@ import {
 } from '@mui/material';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBulletedOutlined';
+import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 
 export default function Sidebar() {
   const [aberto, setAberto] = useState(true);
@@ -78,11 +79,32 @@ export default function Sidebar() {
               onClick={() => navigate('/colaboradores')}
             >
               <ListItemIcon sx={{ minWidth: 32 }}>
-                <ListAltOutlinedIcon fontSize="small" />
+                <FormatListBulletedOutlinedIcon fontSize="small" />
               </ListItemIcon>
 
               <ListItemText
                 primary="Listagem de colaboradores"
+                primaryTypographyProps={{
+                  fontSize: 13,
+                }}
+              />
+            </ListItemButton>
+            <ListItemButton
+              sx={{
+                pl: 6,
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#F3F4F6',
+                },
+              }}
+              onClick={() => navigate('/colaboradores/novo')}
+            >
+              <ListItemIcon sx={{ minWidth: 32 }}>
+                <PersonAddAltOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+
+              <ListItemText
+                primary="Cadastro de colaborador"
                 primaryTypographyProps={{
                   fontSize: 13,
                 }}

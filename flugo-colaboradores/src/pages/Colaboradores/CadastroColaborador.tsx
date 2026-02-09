@@ -17,10 +17,21 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import StepperVertical from '../../components/StepperVertical';
 import Sidebar from '../../components/Sidebar';
-import { useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
+import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useEffect } from 'react';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
+const emailValido = (email: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 export default function CadastroColaborador() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const modoEdicao = Boolean(id);
+
   const [etapa, setEtapa] = useState(0);
 
   const [nome, setNome] = useState('');
@@ -32,25 +43,37 @@ export default function CadastroColaborador() {
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState('');
 
+  const emailInvalido =
+    email.length > 0 && !emailValido(email);
+
   const progresso = etapa === 0 ? 0 : etapa === 1 ? 50 : 100;
 
   const podeAvancar =
-    nome.trim().length > 0 && email.trim().length > 0;
+    nome.trim().length > 0 && 
+    email.trim().length > 0 &&
+    emailValido(email);
   
-  const navigate = useNavigate();
-
-  const cadastrarColaborador = async () => {
+  const salvarColaborador = async () => {
     try {
       setCarregando(true);
       setErro('');
 
-      await addDoc(collection(db, 'colaboradores'), {
-        nome,
-        email,
-        ativo,
-        departamento,
-        criadoEm: serverTimestamp(),
-      });
+      if (modoEdicao && id) {
+        await updateDoc(doc(db, 'colaboradores', id), {
+          nome,
+          email,
+          ativo,
+          departamento,
+        });
+      } else {
+        await addDoc(collection(db, 'colaboradores'), {
+          nome,
+          email,
+          ativo,
+          departamento,
+          criadoEm: serverTimestamp(),
+        });
+      }
 
       setSucesso(true);
 
@@ -58,12 +81,35 @@ export default function CadastroColaborador() {
         navigate('/colaboradores');
       }, 1200);
     } catch (e) {
-      setErro('Erro ao cadastrar colaborador');
+      setErro('Erro ao salvar colaborador');
       console.error(e);
     } finally {
       setCarregando(false);
     }
   };
+
+  useEffect(() => {
+    if (!id) return;
+
+    const buscarColaborador = async () => {
+      try {
+        const docRef = doc(db, 'colaboradores', id);
+        const snapshot = await getDoc(docRef);
+
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          setNome(data.nome);
+          setEmail(data.email);
+          setDepartamento(data.departamento);
+          setAtivo(data.ativo);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar colaborador', error);
+      }
+    };
+
+    buscarColaborador();
+  }, [id]);
 
   return (
     <Box display="flex" minHeight="100vh">
@@ -89,6 +135,26 @@ export default function CadastroColaborador() {
         </Box>
 
         <Box px={4} pt={3} pb={2} bgcolor="#FFFFFF">
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate('/colaboradores')}
+            sx={{
+              textTransform: 'none',
+              fontSize: 14,
+              fontWeight: 500,
+              color: '#637381',
+              mb: 1,
+              px: 0,
+              minWidth: 'auto',
+              '&:hover': {
+                backgroundColor: 'transparent',
+                color: '#212B36',
+              },
+            }}
+          >
+            Voltar para colaboradores
+          </Button>
+
           <Typography fontSize={14} color="#637381" mb={1}>
             <Box
               component="span"
@@ -131,15 +197,24 @@ export default function CadastroColaborador() {
           </Box>
         </Box>
 
-
-        <Box p={4} pb={10}>
-          <Grid container spacing={4}>
-            <Grid item xs={3} fontSize={14} color='#DFE3E8' fontWeight={600}>
+       <Box p={4} pb={10} width="100%">
+          <Box display="flex" gap={4} width="100%">
+            <Box
+              minWidth={180}
+              color="#DFE3E8"
+              fontWeight={600}
+              fontSize={14}
+            >
               <StepperVertical etapaAtiva={etapa} />
-            </Grid>
+            </Box>
 
-            <Grid item xs={3}>
-              <Typography fontWeight={700} mb={3} fontSize={24} color='#637381'>
+            <Box flex={1} width="100%">
+              <Typography
+                fontWeight={700}
+                mb={3}
+                fontSize={24}
+                color="#637381"
+              >
                 {etapa === 0
                   ? 'Informações Básicas'
                   : 'Informações Profissionais'}
@@ -149,7 +224,7 @@ export default function CadastroColaborador() {
                 <>
                   <TextField
                     label="Nome"
-                    error={!nome && !podeAvancar}
+                    placeholder="Luiz Filipe M. Kato"
                     fullWidth
                     size="small"
                     sx={{ mb: 2 }}
@@ -159,7 +234,6 @@ export default function CadastroColaborador() {
 
                   <TextField
                     label="E-mail"
-                    error={!nome && !podeAvancar}
                     placeholder="e.g. john@gmail.com"
                     fullWidth
                     size="small"
@@ -198,8 +272,8 @@ export default function CadastroColaborador() {
                   </Select>
                 </FormControl>
               )}
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
 
         <Box
@@ -228,7 +302,7 @@ export default function CadastroColaborador() {
                 (etapa === 0 && !podeAvancar)
               }
               onClick={() =>
-                etapa === 0 ? setEtapa(1) : cadastrarColaborador()
+                etapa === 0 ? setEtapa(1) : salvarColaborador()
               }
               sx={{
                 color: 'white',
@@ -237,7 +311,7 @@ export default function CadastroColaborador() {
                 px: 4,
               }}
             >
-              {etapa === 0 ? 'Próximo' : 'Concluir'}
+              {etapa === 0 ? 'Salvar alterações' : 'Concluir'}
             </Button>
           </Box>
         </Box>
