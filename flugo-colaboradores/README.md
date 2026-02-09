@@ -208,8 +208,8 @@ O projeto foi buildado e publicado na **Vercel**.
 **Luiz Filipe**
 Desenvolvedor Frontend & Software Engineer
 
-📎 LinkedIn: [https://linkedin.com/in/seu-link](https://linkedin.com/in/seu-link)
-📎 GitHub: [https://github.com/seu-usuario](https://github.com/seu-usuario)
+📎 LinkedIn: [https://linkedin.com/in/luizfilipemkato](https://linkedin.com/in/luizfilipemkato)
+📎 GitHub: [https://github.com/Luiz-Filipee](https://github.com/Luiz-Filipee)
 
 ---
 

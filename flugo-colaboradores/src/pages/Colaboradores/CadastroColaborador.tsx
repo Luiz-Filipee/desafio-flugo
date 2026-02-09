@@ -17,7 +17,6 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import StepperVertical from '../../components/StepperVertical';
 import Sidebar from '../../components/Sidebar';
-import Grid from '@mui/material/Grid';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useEffect } from 'react';
@@ -42,9 +41,6 @@ export default function CadastroColaborador() {
   const [carregando, setCarregando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState('');
-
-  const emailInvalido =
-    email.length > 0 && !emailValido(email);
 
   const progresso = etapa === 0 ? 0 : etapa === 1 ? 50 : 100;
 
