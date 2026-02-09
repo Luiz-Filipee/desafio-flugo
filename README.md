@@ -2,7 +2,7 @@
 
 Uma aplicação **SaaS-style** para **gestão de colaboradores**, construída com foco em **UX moderna**, **componentização**, **boas práticas de frontend** e **integração em tempo real com Firebase**.
 
-🔗 **Projeto online (Vercel):** [https://desafio-flugo-uskz.vercel.app/](https://SEU-LINK-DO-VERCEL-AQUI)
+🔗 **Projeto online (Vercel):** [https://desafio-flugo-uskz.vercel.app/](https://desafio-flugo-uskz.vercel.app/)
 
 ---
 
@@ -179,7 +179,7 @@ http://localhost:5173
 
 O projeto foi buildado e publicado na **Vercel**.
 
-🔗 **Link:** [https://desafio-flugo-uskz.vercel.app/](https://SEU-LINK-DO-VERCEL-AQUI)
+🔗 **Link:** [https://desafio-flugo-uskz.vercel.app/](https://desafio-flugo-uskz.vercel.app/)
 
 ---
 
