@@ -1,10 +1,10 @@
-import LayoutSistema from './layouts/LayoutSistema';
-import CadastroColaborador from './pages/CadastroColaborador';
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './routes';
 
 export default function App() {
   return (
-    <LayoutSistema>
-      <CadastroColaborador />
-    </LayoutSistema>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }

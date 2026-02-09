@@ -8,4 +8,5 @@ const configuracaoFirebase = {
 };
 
 const app = initializeApp(configuracaoFirebase);
+
 export const db = getFirestore(app);
