@@ -1,73 +1,216 @@
-# React + TypeScript + Vite
+# 🚀 Flugo – Gestão de Colaboradores
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Uma aplicação **SaaS-style** para **gestão de colaboradores**, construída com foco em **UX moderna**, **componentização**, **boas práticas de frontend** e **integração em tempo real com Firebase**.
 
-Currently, two official plugins are available:
+🔗 **Projeto online (Vercel):** [https://SEU-LINK-DO-VERCEL-AQUI](https://SEU-LINK-DO-VERCEL-AQUI)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🧠 Visão Geral
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+O **Flugo** permite cadastrar, editar, listar e gerenciar colaboradores de forma simples e profissional, seguindo padrões visuais inspirados em ferramentas como **Monday**, **ClickUp** e **Notion**.
 
-## Expanding the ESLint configuration
+O sistema foi desenvolvido com **React + MUI**, utilizando **Firebase Firestore** como banco de dados e **React Router** para navegação.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## ✨ Funcionalidades Implementadas
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 👥 Colaboradores
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* ✅ Cadastro de colaborador em **duas etapas (Stepper)**
+* ✅ Edição de colaborador com dados pré-carregados
+* ✅ Listagem com ordenação por coluna
+* ✅ Status **Ativo / Inativo**
+* ✅ Exclusão lógica (soft delete → `ativo = false`)
+* ✅ Redirecionamento automático após salvar
+
+### 🧭 Navegação
+
+* ✅ Sidebar fixa
+* ✅ Menu de colaboradores **expansível**
+* ✅ Destaque visual conforme rota
+
+### 🧩 UX / UI
+
+* ✅ Stepper vertical flutuante
+* ✅ Inputs ocupando toda a área útil da tela
+* ✅ Validação de e-mail em tempo real
+* ✅ Botão desabilitado quando formulário inválido
+* ✅ Snackbar de sucesso e erro
+* ✅ Modal de confirmação ao excluir
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+* **React + TypeScript**
+* **Material UI (MUI)**
+* **React Router DOM**
+* **Firebase Firestore**
+* **Vite**
+* **Vercel (Deploy)**
+
+---
+
+## 📁 Estrutura do Projeto
+
+```bash
+src/
+├── assets/                # Logos e imagens
+│   ├── logo-flugo.png
+│   └── react.svg
+│
+├── components/            # Componentes reutilizáveis
+│   ├── Cabecalho/
+│   │   └── index.tsx
+│   ├── Sidebar/
+│   │   └── index.tsx
+│   └── StepperVertical/
+│       └── index.tsx
+│
+├── layouts/               # Layouts da aplicação
+│   └── LayoutSistema.tsx
+│
+├── pages/
+│   └── Colaboradores/
+│       ├── CadastroColaborador.tsx
+│       └── ListagemColaboradores.tsx
+│
+├── routes/                # Configuração de rotas
+│   └── index.tsx
+│
+├── services/              # Integrações externas
+│   ├── colaboradorService.ts
+│   └── firebase.ts
+│
+├── styles/                # Tema e estilos globais
+│   └── theme.ts
+│
+├── types/                 # Tipagens TypeScript
+│   └── Colaborador.ts
+│
+├── utils/                 # Utilidades e constantes
+│   └── constantes.ts
+│
+├── App.tsx
+├── main.tsx
+└── index.css
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🔥 Integração com Firebase
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* Banco: **Firestore**
+* Coleção: `colaboradores`
+
+### Estrutura do documento
+
+```ts
+{
+  nome: string;
+  email: string;
+  departamento: string;
+  ativo: boolean;
+  criadoEm: Timestamp;
+}
 ```
+
+---
+
+## ▶️ Como Rodar o Projeto Localmente
+
+### 1️⃣ Clonar o repositório
+
+```bash
+git clone https://github.com/seu-usuario/flugo.git
+cd flugo
+```
+
+### 2️⃣ Instalar dependências
+
+```bash
+npm install
+```
+
+### 3️⃣ Configurar Firebase
+
+Crie um arquivo:
+
+```bash
+src/services/firebase.ts
+```
+
+E adicione suas credenciais:
+
+```ts
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_DOMINIO",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_BUCKET",
+  messagingSenderId: "SEU_ID",
+  appId: "SEU_APP_ID",
+};
+
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
+```
+
+### 4️⃣ Rodar o projeto
+
+```bash
+npm run dev
+```
+
+Acesse:
+
+```
+http://localhost:5173
+```
+
+---
+
+## 🌍 Deploy
+
+O projeto foi buildado e publicado na **Vercel**.
+
+🔗 **Link:** [https://SEU-LINK-DO-VERCEL-AQUI](https://SEU-LINK-DO-VERCEL-AQUI)
+
+---
+
+## 🧪 Testes Manuais Sugeridos
+
+* Criar colaborador sem e-mail → botão desabilitado
+* Criar colaborador com e-mail inválido → erro visual
+* Editar colaborador existente
+* Desativar colaborador (exclusão lógica)
+* Ordenar lista por nome, email e status
+
+---
+
+## 📌 Próximas Melhorias (Roadmap)
+
+* 🔐 Autenticação (Firebase Auth)
+* 👤 Perfis e permissões
+* 🔍 Busca e filtros avançados
+* 📊 Dashboard com métricas
+* 📱 Responsividade mobile
+
+---
+
+## 👨‍💻 Autor
+
+**Luiz Filipe**
+Desenvolvedor Frontend & Software Engineer
+
+📎 LinkedIn: [https://linkedin.com/in/seu-link](https://linkedin.com/in/seu-link)
+📎 GitHub: [https://github.com/seu-usuario](https://github.com/seu-usuario)
+
+---
+
+⭐ Se esse projeto te ajudou ou inspirou, deixe uma estrela no repositório!
