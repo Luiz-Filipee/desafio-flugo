@@ -13,6 +13,13 @@ import {
   TableSortLabel,
   Paper,
   CircularProgress,
+  TextField,
+  Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -21,123 +28,119 @@ import {
   getDocs,
   QueryDocumentSnapshot,
   updateDoc,
+  doc,
 } from 'firebase/firestore';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-} from '@mui/material';
-import { db } from '../../services/firebase';
-import Sidebar from '../../components/Sidebar';
-import type { Colaborador } from '../../types/Colaborador';
-import { doc } from 'firebase/firestore';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import IconButton from '@mui/material/IconButton';
-
+import Sidebar from '../../components/Sidebar';
+import { db } from '../../services/firebase';
+import type { Colaborador } from '../../types/Colaborador';
 
 type Ordem = 'asc' | 'desc';
 
 export default function ListaColaboradores() {
-    const [modalAberto, setModalAberto] = useState(false);
-    const [idParaExcluir, setIdParaExcluir] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+  const [carregando, setCarregando] = useState(true);
 
-    const [colaboradores, setColaboradores] = useState<
-        Colaborador[]
-    >([]);
-    const [carregando, setCarregando] = useState(true);
+  const [ordem, setOrdem] = useState<Ordem>('asc');
+  const [ordenarPor, setOrdenarPor] = useState<keyof Colaborador>('nome');
 
-    const [ordem, setOrdem] = useState<Ordem>('asc');
-    const [ordenarPor, setOrdenarPor] =
-        useState<keyof Colaborador>('nome');
+  const [filtroNome, setFiltroNome] = useState('');
+  const [filtroEmail, setFiltroEmail] = useState('');
+  const [filtroDepartamento, setFiltroDepartamento] = useState('');
 
-    useEffect(() => {
-        const buscarColaboradores = async () => {
-        try {
-            const snapshot = await getDocs(
-            collection(db, 'colaboradores')
-            );
+  const [selecionados, setSelecionados] = useState<string[]>([]);
 
-            const dados = snapshot.docs.map(
-            (doc: QueryDocumentSnapshot) => ({
-                id: doc.id,
-                ...(doc.data() as Omit<Colaborador, 'id'>),
-            })
-            );
+  const [modalAberto, setModalAberto] = useState(false);
+  const [acaoStatus, setAcaoStatus] = useState<boolean | null>(null);
+  const [idSelecionado, setIdSelecionado] = useState<string | null>(null);
 
-            setColaboradores(dados);
-        } catch (error) {
-            console.error('Erro ao buscar colaboradores', error);
-        } finally {
-            setCarregando(false);
-        }
-        };
-
-        buscarColaboradores();
-    }, []);
-
-    const colaboradoresOrdenados = [...colaboradores].sort(
-        (a, b) => {
-        const valorA = a[ordenarPor];
-        const valorB = b[ordenarPor];
-
-        if (!valorA < !valorB) return ordem === 'asc' ? -1 : 1;
-        if (!valorA > !valorB) return ordem === 'asc' ? 1 : -1;
-        return 0;
-        }
-    );
-
-    const abrirModalExcluir = (id: string) => {
-        setIdParaExcluir(id);
-        setModalAberto(true);
+  useEffect(() => {
+    const buscarColaboradores = async () => {
+      const snapshot = await getDocs(collection(db, 'colaboradores'));
+      const dados = snapshot.docs.map(
+        (doc: QueryDocumentSnapshot) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Colaborador, 'id'>),
+        })
+      );
+      setColaboradores(dados);
+      setCarregando(false);
     };
 
-    const fecharModalExcluir = () => {
-        setModalAberto(false);
-        setIdParaExcluir(null);
-    };
+    buscarColaboradores();
+  }, []);
 
-    const handleOrdenar = (campo: keyof Colaborador) => {
-        const isAsc = ordenarPor === campo && ordem === 'asc';
-        setOrdem(isAsc ? 'desc' : 'asc');
-        setOrdenarPor(campo);
-    };
+  const limparFiltros = () => {
+    setFiltroNome('');
+    setFiltroEmail('');
+    setFiltroDepartamento('');
+  };
 
-    const excluirColaborador = async () => {
-        if (!idParaExcluir) return;
+  const handleOrdenar = (campo: keyof Colaborador) => {
+    const isAsc = ordenarPor === campo && ordem === 'asc';
+    setOrdem(isAsc ? 'desc' : 'asc');
+    setOrdenarPor(campo);
+  };
 
-        try {
-            await updateDoc(
-            doc(db, 'colaboradores', idParaExcluir),
-            {
-                ativo: false,
-            }
-            );
+  const colaboradoresFiltradosOrdenados = [...colaboradores]
+    .filter(c =>
+      c.nome.toLowerCase().includes(filtroNome.toLowerCase()) &&
+      c.email.toLowerCase().includes(filtroEmail.toLowerCase()) &&
+      c.departamento?.toLowerCase().includes(filtroDepartamento.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aVal = a[ordenarPor]!;
+      const bVal = b[ordenarPor]!;
+      return ordem === 'asc' ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
+    });
 
-            setColaboradores(prev =>
-            prev.map(colaborador =>
-                colaborador.id === idParaExcluir
-                ? { ...colaborador, ativo: false }
-                : colaborador
-            )
-            );
+  const abrirConfirmacao = (id: string | null, novoStatus: boolean) => {
+    setIdSelecionado(id);
+    setAcaoStatus(novoStatus);
+    setModalAberto(true);
+  };
 
-            fecharModalExcluir();
-        } catch (error) {
-            console.error('Erro ao inativar colaborador', error);
-        }
-    };
+  const confirmarAcao = async () => {
+    if (idSelecionado) {
+      await updateDoc(doc(db, 'colaboradores', idSelecionado), {
+        ativo: acaoStatus,
+      });
 
-    return (
-        <Box display="flex" minHeight="100vh">
-        <Sidebar />
+      setColaboradores(prev =>
+        prev.map(c =>
+          c.id === idSelecionado ? { ...c, ativo: acaoStatus! } : c
+        )
+      );
+    } else {
+      await Promise.all(
+        selecionados.map(id =>
+          updateDoc(doc(db, 'colaboradores', id), { ativo: false })
+        )
+      );
 
-        <Box flex={1} p={4} bgcolor="#FFFFFF">
-            <Box
+      setColaboradores(prev =>
+        prev.map(c =>
+          selecionados.includes(c.id!) ? { ...c, ativo: false } : c
+        )
+      );
+
+      setSelecionados([]);
+    }
+
+    setModalAberto(false);
+  };
+
+  return (
+    <Box display="flex" minHeight="100vh">
+      <Sidebar />
+
+      <Box flex={1} p={4}>
+        <Box
             height={20}
             px={4}
             display="flex"
@@ -173,213 +176,123 @@ export default function ListaColaboradores() {
             >
                 Novo Colaborador
             </Button>
-            </Box>
+        </Box>
 
-            {carregando ? (
-            <Box
-                display="flex"
-                justifyContent="center"
-                mt={6}
-            >
-                <CircularProgress />
-            </Box>
-            ) : (
-            <TableContainer
-                    component={Paper}
-                    elevation={0}
-                    sx={{
-                        borderRadius: 2,
-                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)',
-                    }}
-                >
-                <Table>
-                <TableHead sx={{ backgroundColor: '#F4F6F8' }}>
-                    <TableRow>
-                    <TableCell>
-                        <TableSortLabel
-                            active={ordenarPor === 'nome'}
-                            direction={ordem}
-                            onClick={() => handleOrdenar('nome')}
-                            sx={{
-                                color: '#637381',
-                                fontWeight: 600,
-                                '&.Mui-active': {
-                                color: '#212B36',
-                                },
-                                '&:hover': {
-                                color: '#212B36',
-                                },
-                            }}
-                        >
-                        Nome
-                        </TableSortLabel>
+        <Box display="flex" gap={2} mb={3}>
+          <TextField label="Nome" size="small" fullWidth value={filtroNome} onChange={e => setFiltroNome(e.target.value)} />
+          <TextField label="Email" size="small" fullWidth value={filtroEmail} onChange={e => setFiltroEmail(e.target.value)} />
+          <TextField label="Departamento" size="small" fullWidth value={filtroDepartamento} onChange={e => setFiltroDepartamento(e.target.value)} />
+          <Button onClick={limparFiltros} sx={{ border: '1px solid #ef4444', color: '#ef4444', px: 3, textTransform: 'none', fontWeight: 600 }}>
+            Limpar
+          </Button>
+        </Box>
+
+        {selecionados.length > 0 && (
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => abrirConfirmacao(null, false)}
+          >
+            Desativar selecionados ({selecionados.length})
+          </Button>
+        )}
+
+        {carregando ? (
+          <CircularProgress />
+        ) : (
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell padding="checkbox" />
+                  {['nome', 'email', 'departamento', 'ativo'].map(campo => (
+                    <TableCell key={campo}>
+                      <TableSortLabel
+                        active={ordenarPor === campo}
+                        direction={ordem}
+                        onClick={() => handleOrdenar(campo as keyof Colaborador)}
+                      >
+                        {campo}
+                      </TableSortLabel>
+                    </TableCell>
+                  ))}
+                  <TableCell align="right">Ações</TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {colaboradoresFiltradosOrdenados.map(colaborador => (
+                  <TableRow key={colaborador.id}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        disabled={!colaborador.ativo}
+                        checked={selecionados.includes(colaborador.id!)}
+                        onChange={e =>
+                          setSelecionados(prev =>
+                            e.target.checked
+                              ? [...prev, colaborador.id!]
+                              : prev.filter(id => id !== colaborador.id!)
+                          )
+                        }
+                      />
                     </TableCell>
 
-                    <TableCell>
-                        <TableSortLabel
-                            active={ordenarPor === 'email'}
-                            direction={ordem}
-                            onClick={() => handleOrdenar('email')}
-                            sx={{
-                                color: '#637381',
-                                fontWeight: 600,
-                                '&.Mui-active': {
-                                color: '#212B36',
-                                },
-                                '&:hover': {
-                                color: '#212B36',
-                                },
-                            }}
-                        >
-                        Email
-                        </TableSortLabel>
-                    </TableCell>
+                    <TableCell>{colaborador.nome}</TableCell>
+                    <TableCell>{colaborador.email}</TableCell>
+                    <TableCell>{colaborador.departamento}</TableCell>
 
                     <TableCell>
-                        <TableSortLabel
-                            active={ordenarPor === 'departamento'}
-                            direction={ordem}
-                            onClick={() =>
-                                handleOrdenar('departamento')
-                            }
-                            sx={{
-                                color: '#637381',
-                                fontWeight: 600,
-                                '&.Mui-active': {
-                                color: '#212B36',
-                                },
-                                '&:hover': {
-                                color: '#212B36',
-                                },
-                            }}
-                        >
-                        Departamento
-                        </TableSortLabel>
+                      <Chip
+                        label={colaborador.ativo ? 'Ativo' : 'Inativo'}
+                        color={colaborador.ativo ? 'success' : 'error'}
+                        size="small"
+                      />
                     </TableCell>
 
                     <TableCell align="right">
-                        <TableSortLabel
-                            active={ordenarPor === 'ativo'}
-                            direction={ordem}
-                            onClick={() => handleOrdenar('ativo')}
-                            sx={{
-                                color: '#637381',
-                                fontWeight: 600,
-                                '&.Mui-active': {
-                                color: '#212B36',
-                                },
-                                '&:hover': {
-                                color: '#212B36',
-                                },
-                            }}
-                        >
-                        Status
-                        </TableSortLabel>
+                      <IconButton onClick={() => navigate(`/colaboradores/editar/${colaborador.id}`)}>
+                        <EditOutlinedIcon />
+                      </IconButton>
+
+                      <IconButton
+                        onClick={() =>
+                          abrirConfirmacao(colaborador.id!, !colaborador.ativo)
+                        }
+                        sx={{
+                          color: colaborador.ativo ? '#ef4444' : '#22c55e',
+                        }}
+                      >
+                        {colaborador.ativo ? <DeleteOutlineIcon /> : <CheckCircleOutlineIcon />}
+                      </IconButton>
                     </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
 
-                    <TableCell align="right">Ações</TableCell>
-                    </TableRow>
-                </TableHead>
-
-                <TableBody>
-                    {colaboradoresOrdenados.map(colaborador => (
-                    <TableRow key={colaborador.id} hover>
-                        <TableCell>
-                        <Box
-                            display="flex"
-                            alignItems="center"
-                            gap={2}
-                        >
-                            <Avatar />
-                            <Typography fontWeight={500}>
-                                {colaborador.nome}
-                            </Typography>
-                        </Box>
-                        </TableCell>
-
-                        <TableCell>
-                            {colaborador.email}
-                        </TableCell>
-
-                        <TableCell>
-                            {colaborador.departamento}
-                        </TableCell>
-
-                        <TableCell align="right">
-                            <Chip
-                                label={
-                                colaborador.ativo
-                                    ? 'Ativo'
-                                    : 'Inativo'
-                                }
-                                color={
-                                colaborador.ativo
-                                    ? 'success'
-                                    : 'error'
-                                }
-                                size="small"
-                            />
-                        </TableCell>
-
-                        <TableCell align="right">
-                            <IconButton
-                                size="small"
-                                onClick={() =>
-                                navigate(`/colaboradores/editar/${colaborador.id}`)
-                                }
-                            >
-                                <EditOutlinedIcon fontSize="small" />
-                            </IconButton>
-
-                            <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => abrirModalExcluir(String(colaborador.id))}
-                            >
-                                <DeleteOutlineIcon fontSize="small" />
-                            </IconButton>
-                        </TableCell>
-                    </TableRow>
-                    ))}
-                </TableBody>
-                </Table>
-            </TableContainer>
-            )}
-        </Box>
-        <Dialog
-            open={modalAberto}
-            onClose={fecharModalExcluir}
-            maxWidth="xs"
-            fullWidth
-        >
-            <DialogTitle fontWeight={600}>
-                Desativar colaborador
-            </DialogTitle>
-
-            <DialogContent>
-                <DialogContentText color="#637381">
-                Tem certeza que deseja desativar este colaborador?
-                </DialogContentText>
-            </DialogContent>
-
-            <DialogActions sx={{ px: 3, pb: 2 }}>
-                <Button
-                    onClick={fecharModalExcluir}
-                    sx={{ textTransform: 'none', color: '#637381' }}
-                >
-                Cancelar
-                </Button>
-
-                <Button
-                    onClick={excluirColaborador}
-                    variant="contained"
-                    color="error"
-                    sx={{ textTransform: 'none', fontWeight: 600 }}
-                >
-                Desativar
-                </Button>
-            </DialogActions>
-            </Dialog>
-        </Box>
-    );
+        <Dialog open={modalAberto} onClose={() => setModalAberto(false)}>
+          <DialogTitle fontWeight={600}>
+            Confirmar ação
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Tem certeza que deseja {acaoStatus ? 'ativar' : 'desativar'} este colaborador?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setModalAberto(false)}>Cancelar</Button>
+            <Button
+              variant="contained"
+              color={acaoStatus ? 'success' : 'error'}
+              onClick={confirmarAcao}
+            >
+              Confirmar
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </Box>
+  );
 }
