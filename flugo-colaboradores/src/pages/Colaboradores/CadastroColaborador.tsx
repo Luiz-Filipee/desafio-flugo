@@ -13,7 +13,7 @@ import {
   Select,
 } from '@mui/material';
 import { useState } from 'react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import StepperVertical from '../../components/StepperVertical';
 import Sidebar from '../../components/Sidebar';
@@ -21,6 +21,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useEffect } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import type { Colaborador } from '../../types/Colaborador';
 
 const emailValido = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -37,6 +38,13 @@ export default function CadastroColaborador() {
   const [email, setEmail] = useState('');
   const [ativo, setAtivo] = useState(true);
   const [departamento, setDepartamento] = useState('');
+  const [cargo, setCargo] = useState('');
+  const [dataAdmissao, setDataAdmissao] = useState('');
+  const [nivel, setNivel] = useState('');
+  const [gestorId, setGestorId] = useState('');
+  const [salarioBase, setSalarioBase] = useState('');
+
+  const [gestores, setGestores] = useState<any[]>([]);
 
   const [carregando, setCarregando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
@@ -60,6 +68,11 @@ export default function CadastroColaborador() {
           email,
           ativo,
           departamento,
+          cargo,
+          dataAdmissao,
+          nivel,
+          gestorId: nivel === 'gestor' ? null : gestorId,
+          salarioBase: Number(salarioBase),
         });
       } else {
         await addDoc(collection(db, 'colaboradores'), {
@@ -68,6 +81,11 @@ export default function CadastroColaborador() {
           ativo,
           departamento,
           criadoEm: serverTimestamp(),
+          cargo,
+          dataAdmissao,
+          nivel,
+          gestorId: nivel === 'gestor' ? null : gestorId,
+          salarioBase: Number(salarioBase),
         });
       }
 
@@ -106,6 +124,23 @@ export default function CadastroColaborador() {
 
     buscarColaborador();
   }, [id]);
+
+  useEffect(() => {
+    const buscarGestores = async () => {
+      const snapshot = await getDocs(collection(db, 'colaboradores'));
+
+      const gestoresFiltrados = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Colaborador, 'id'>),
+        }))
+        .filter(colab => colab.nivel === 'gestor' && colab.ativo);
+
+      setGestores(gestoresFiltrados);
+    };
+
+    buscarGestores();
+  }, []);
 
   return (
     <Box display="flex" minHeight="100vh">
@@ -250,23 +285,66 @@ export default function CadastroColaborador() {
               )}
 
               {etapa === 1 && (
-                <FormControl fullWidth size="small">
-                  <InputLabel id="departamento-label">
-                    Departamento
-                  </InputLabel>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <TextField
+                    label="Cargo"
+                    size="small"
+                    fullWidth
+                    value={cargo}
+                    onChange={e => setCargo(e.target.value)}
+                  />
 
-                  <Select
-                    labelId="departamento-label"
-                    value={departamento}
-                    label="Departamento"
-                    onChange={e => setDepartamento(e.target.value)}
-                  >
-                    <MenuItem value="Design">Design</MenuItem>
-                    <MenuItem value="Produto">Produto</MenuItem>
-                    <MenuItem value="TI">TI</MenuItem>
-                    <MenuItem value="Marketing">Marketing</MenuItem>
-                  </Select>
-                </FormControl>
+                  <TextField
+                    label="Data de admissão"
+                    type="date"
+                    size="small"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    value={dataAdmissao}
+                    onChange={e => setDataAdmissao(e.target.value)}
+                  />
+
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Nível hierárquico</InputLabel>
+                    <Select
+                      value={nivel}
+                      label="Nível hierárquico"
+                      onChange={e => setNivel(e.target.value)}
+                    >
+                      <MenuItem value="junior">Júnior</MenuItem>
+                      <MenuItem value="pleno">Pleno</MenuItem>
+                      <MenuItem value="senior">Sênior</MenuItem>
+                      <MenuItem value="gestor">Gestor</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  {nivel !== 'gestor' && (
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Gestor responsável</InputLabel>
+                      <Select
+                        value={gestorId}
+                        label="Gestor responsável"
+                        onChange={e => setGestorId(e.target.value)}
+                      >
+                        {gestores.map(gestor => (
+                          <MenuItem key={gestor.id} value={gestor.id}>
+                            {gestor.nome}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
+
+                  <TextField
+                    label="Salário base"
+                    type="number"
+                    size="small"
+                    fullWidth
+                    value={salarioBase}
+                    onChange={e => setSalarioBase(e.target.value)}
+                    InputProps={{ startAdornment: 'R$ ' }}
+                  />
+                </Box>
               )}
             </Box>
           </Box>

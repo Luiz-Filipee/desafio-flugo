@@ -3,6 +3,11 @@ export interface Colaborador {
   nome: string;
   email: string;
   ativo: boolean;
-  departamento?: string;
-  criadoEm: Date;
+  departamento: string;
+
+  cargo?: string;
+  dataAdmissao?: string;
+  nivel?: 'junior' | 'pleno' | 'senior' | 'gestor';
+  gestorId?: string | null;
+  salarioBase?: number;
 }
