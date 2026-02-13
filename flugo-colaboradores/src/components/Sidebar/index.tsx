@@ -112,6 +112,86 @@ export default function Sidebar() {
             </ListItemButton>
           </List>
         </Collapse>
+
+        <ListItemButton
+          onClick={() => setAberto(!aberto)}
+          sx={{
+            px: 2,
+            py: 1.5,
+            '&:hover': {
+              backgroundColor: '#F3F4F6',
+            },
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 36 }}>
+            <PeopleOutlineIcon fontSize="small" />
+          </ListItemIcon>
+
+          <ListItemText
+            primary="Departamentos"
+            primaryTypographyProps={{
+              fontSize: 14,
+              fontWeight: 500,
+            }}
+          />
+
+          <IconButton
+            size="small"
+            sx={{
+              transform: aberto ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: '0.2s',
+            }}
+          >
+            <ExpandMoreIcon fontSize="small" />
+          </IconButton>
+        </ListItemButton>
+
+        <Collapse in={!aberto} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{
+                pl: 6,
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#F3F4F6',
+                },
+              }}
+              onClick={() => navigate('/departamentos')}
+            >
+              <ListItemIcon sx={{ minWidth: 32 }}>
+                <FormatListBulletedOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+
+              <ListItemText
+                primary="Listagem de departamentos"
+                primaryTypographyProps={{
+                  fontSize: 13,
+                }}
+              />
+            </ListItemButton>
+            <ListItemButton
+              sx={{
+                pl: 6,
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#F3F4F6',
+                },
+              }}
+              onClick={() => navigate('/departamentos/novo')}
+            >
+              <ListItemIcon sx={{ minWidth: 32 }}>
+                <PersonAddAltOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+
+              <ListItemText
+                primary="Cadastro de departamento"
+                primaryTypographyProps={{
+                  fontSize: 13,
+                }}
+              />
+            </ListItemButton>
+          </List>
+        </Collapse>
       </List>
     </Box>
   );
