@@ -38,6 +38,8 @@ export default function CadastroColaborador() {
   const [email, setEmail] = useState('');
   const [ativo, setAtivo] = useState(true);
   const [departamento, setDepartamento] = useState('');
+  const [departamentoId, setDepartamentoId] = useState('');
+  const [departamentoAnteriorId, setDepartamentoAnteriorId] = useState('');
   const [cargo, setCargo] = useState('');
   const [dataAdmissao, setDataAdmissao] = useState('');
   const [nivel, setNivel] = useState('');
@@ -45,6 +47,7 @@ export default function CadastroColaborador() {
   const [salarioBase, setSalarioBase] = useState('');
 
   const [gestores, setGestores] = useState<any[]>([]);
+  const [departamentos, setDepartamentos] = useState<any[]>([]);
 
   const [carregando, setCarregando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
@@ -58,6 +61,12 @@ export default function CadastroColaborador() {
     emailValido(email);
   
   const salvarColaborador = async () => {
+    if (!departamentoId || !departamento) {
+      setErro('O colaborador deve estar vinculado a um departamento');
+      setCarregando(false);
+      return;
+    }
+
     try {
       setCarregando(true);
       setErro('');
@@ -67,6 +76,7 @@ export default function CadastroColaborador() {
           nome,
           email,
           ativo,
+          departamentoId,
           departamento,
           cargo,
           dataAdmissao,
@@ -75,17 +85,47 @@ export default function CadastroColaborador() {
           salarioBase: Number(salarioBase),
         });
       } else {
-        await addDoc(collection(db, 'colaboradores'), {
+        const novoColab = await addDoc(collection(db, 'colaboradores'), {
           nome,
           email,
           ativo,
           departamento,
+          departamentoId,
           criadoEm: serverTimestamp(),
           cargo,
           dataAdmissao,
           nivel,
           gestorId: nivel === 'gestor' ? null : gestorId,
           salarioBase: Number(salarioBase),
+        });
+
+        const deptRef = doc(db, 'departamentos', departamentoId);
+        const deptSnap = await getDoc(deptRef);
+
+        await updateDoc(deptRef, {
+          colaboradores: [...deptSnap.data()!.colaboradores, novoColab.id],
+        });
+
+        setSucesso(true);
+        navigate('/colaboradores');
+        return;
+      }
+
+      if (departamentoAnteriorId !== departamentoId) {
+        const antigoRef = doc(db, 'departamentos', departamentoAnteriorId);
+        const antigoSnap = await getDoc(antigoRef);
+
+        await updateDoc(antigoRef, {
+          colaboradores: antigoSnap
+            .data()!
+            .colaboradores.filter((c: string) => c !== id),
+        });
+
+        const novoRef = doc(db, 'departamentos', departamentoId);
+        const novoSnap = await getDoc(novoRef);
+
+        await updateDoc(novoRef, {
+          colaboradores: [...novoSnap.data()!.colaboradores, id],
         });
       }
 
@@ -106,24 +146,28 @@ export default function CadastroColaborador() {
     if (!id) return;
 
     const buscarColaborador = async () => {
-      try {
-        const docRef = doc(db, 'colaboradores', id);
-        const snapshot = await getDoc(docRef);
+      const snapshot = await getDoc(doc(db, 'colaboradores', id));
 
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          setNome(data.nome);
-          setEmail(data.email);
-          setDepartamento(data.departamento);
-          setAtivo(data.ativo);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar colaborador', error);
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+
+        setNome(data.nome);
+        setEmail(data.email);
+        setAtivo(data.ativo);
+        setDepartamento(data.departamento || 'N/A');
+        setDepartamentoId(data.departamentoId);
+        setDepartamentoAnteriorId(data.departamentoId);
+        setCargo(data.cargo);
+        setNivel(data.nivel);
+        setGestorId(data.gestorId || '');
+        setSalarioBase(data.salarioBase?.toString() || '');
+        setDataAdmissao(data.dataAdmissao || '');
       }
     };
 
     buscarColaborador();
   }, [id]);
+
 
   useEffect(() => {
     const buscarGestores = async () => {
@@ -140,6 +184,23 @@ export default function CadastroColaborador() {
     };
 
     buscarGestores();
+  }, []);
+
+  useEffect(() => {
+    const buscarDepartamentos = async () => {
+      const snapshot = await getDocs(collection(db, 'departamentos'));
+
+      const departamentoFiltrados = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Colaborador, 'id'>),
+        }))
+        .filter(colab => colab.ativo);
+
+      setDepartamentos(departamentoFiltrados);
+    };
+
+    buscarDepartamentos();
   }, []);
 
   return (
@@ -286,6 +347,28 @@ export default function CadastroColaborador() {
 
               {etapa === 1 && (
                 <Box display="flex" flexDirection="column" gap={2}>
+                  <FormControl fullWidth size="small" required>
+                    <InputLabel>Departamento</InputLabel>
+                    <Select
+                      value={departamentoId}
+                      label="Departamento"
+                      onChange={e => {
+                          const depId = e.target.value;
+                          const depSelecionado = departamentos.find(d => d.id === depId);
+
+                          setDepartamentoId(depId);
+                          setDepartamento(depSelecionado.nome || 'N/A')
+                        }
+                      }
+                    >
+                      {departamentos.map(dep => (
+                        <MenuItem key={dep.id} value={dep.id}>
+                          {dep.nome}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
                   <TextField
                     label="Cargo"
                     size="small"
@@ -383,6 +466,7 @@ export default function CadastroColaborador() {
                 fontWeight: 700,
                 textTransform: 'none',
                 px: 4,
+                bgcolor: 'green'
               }}
             >
               {etapa === 0 ? 'Salvar alterações' : 'Concluir'}

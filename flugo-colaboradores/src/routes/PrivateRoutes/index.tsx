@@ -1,11 +1,11 @@
 import { Navigate } from 'react-router-dom';
-import { isAuthenticated } from '../../services/authService';
-import type { JSX } from 'react/jsx-runtime';
+import type { JSX } from 'react';
+import { useAuth } from '../../contexts/useAuth';
 
 export default function PrivateRoute({ children }: { children: JSX.Element }) {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
+  const { user, loading } = useAuth();
 
-  return children;
+  if (loading) return null;
+
+  return user ? children : <Navigate to="/login" />;
 }

@@ -14,10 +14,17 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FormatListBulletedOutlinedIcon from '@mui/icons-material/FormatListBulletedOutlined';
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
 export default function Sidebar() {
   const [aberto, setAberto] = useState(true);
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
   return (
     <Box
@@ -124,7 +131,7 @@ export default function Sidebar() {
           }}
         >
           <ListItemIcon sx={{ minWidth: 36 }}>
-            <PeopleOutlineIcon fontSize="small" />
+            <ApartmentIcon fontSize="small" />
           </ListItemIcon>
 
           <ListItemText
@@ -180,7 +187,7 @@ export default function Sidebar() {
               onClick={() => navigate('/departamentos/novo')}
             >
               <ListItemIcon sx={{ minWidth: 32 }}>
-                <PersonAddAltOutlinedIcon fontSize="small" />
+                <ApartmentIcon fontSize="small" />
               </ListItemIcon>
 
               <ListItemText
@@ -193,6 +200,37 @@ export default function Sidebar() {
           </List>
         </Collapse>
       </List>
+      <Box
+        position="absolute"
+        bottom={0}
+        width={240}
+        borderTop="1px solid #E5E7EB"
+      >
+        <ListItemButton
+          onClick={handleLogout}
+          sx={{
+            px: 2,
+            py: 1.5,
+            color: '#EF4444',
+            '&:hover': {
+              backgroundColor: '#FEF2F2',
+            },
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 36, color: '#EF4444' }}>
+            <LogoutOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+
+          <ListItemText
+            primary="Sair"
+            primaryTypographyProps={{
+              fontSize: 14,
+              fontWeight: 500,
+            }}
+          />
+        </ListItemButton>
+      </Box>
+
     </Box>
   );
 }

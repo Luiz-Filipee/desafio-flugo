@@ -5,6 +5,7 @@ import {
   Typography,
   Paper,
   CircularProgress,
+  Snackbar,
 } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +17,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState('');
 
   const handleLogin = async () => {
@@ -130,6 +132,19 @@ export default function Login() {
           )}
         </Button>
 
+        <Button
+          fullWidth
+          onClick={() => navigate('/criar-conta')}
+          sx={{
+            mt: 2,
+            textTransform: 'none',
+            fontSize: 14,
+            color: '#22C55E',
+          }}
+        >
+          Criar uma conta
+        </Button>
+
         <Typography
           fontSize={12}
           color="#9CA3AF"
@@ -139,6 +154,20 @@ export default function Login() {
           © {new Date().getFullYear()} Flugo. Todos os direitos reservados.
         </Typography>
       </Paper>
+
+      <Snackbar
+        open={sucesso}
+        autoHideDuration={3000}
+        message="Login realizado com sucesso!"
+        onClose={() => setSucesso(false)}
+      />
+
+      <Snackbar
+        open={!!erro}
+        autoHideDuration={3000}
+        message="Erro ao realizar login!"
+        onClose={() => setErro('')}
+      />
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
 
 export async function login(email: string, password: string) {
@@ -13,6 +13,12 @@ export async function login(email: string, password: string) {
 
   return userCredential.user;
 }
+
+export const register = async (email: string, senha: string) => {
+  const cred = await createUserWithEmailAndPassword(auth, email, senha);
+  localStorage.setItem('token', await cred.user.getIdToken());
+  return cred.user;
+};
 
 export function logout() {
   localStorage.removeItem('token');

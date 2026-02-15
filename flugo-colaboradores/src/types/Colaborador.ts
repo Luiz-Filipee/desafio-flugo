@@ -4,6 +4,7 @@ export interface Colaborador {
   email: string;
   ativo: boolean;
   departamento: string;
+  departamentoId: string;
 
   cargo?: string;
   dataAdmissao?: string;
