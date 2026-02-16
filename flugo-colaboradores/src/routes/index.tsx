@@ -51,15 +51,6 @@ export default function AppRoutes() {
       />
 
       <Route 
-        path="/" 
-        element={
-          <PrivateRoute>
-            <ListaDepartamentos />
-          </PrivateRoute>
-        }
-      />
-
-      <Route 
         path="/departamentos" 
         element={
           <PrivateRoute>

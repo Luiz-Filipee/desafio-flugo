@@ -200,21 +200,14 @@ export default function Sidebar() {
           </List>
         </Collapse>
       </List>
-      <Box
-        position="absolute"
-        bottom={0}
-        width={240}
-        borderTop="1px solid #E5E7EB"
-      >
+      <Box borderTop="1px solid #E5E7EB">
         <ListItemButton
           onClick={handleLogout}
           sx={{
             px: 2,
             py: 1.5,
             color: '#EF4444',
-            '&:hover': {
-              backgroundColor: '#FEF2F2',
-            },
+            '&:hover': { backgroundColor: '#FEF2F2' },
           }}
         >
           <ListItemIcon sx={{ minWidth: 36, color: '#EF4444' }}>
@@ -223,10 +216,7 @@ export default function Sidebar() {
 
           <ListItemText
             primary="Sair"
-            primaryTypographyProps={{
-              fontSize: 14,
-              fontWeight: 500,
-            }}
+            primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
           />
         </ListItemButton>
       </Box>
