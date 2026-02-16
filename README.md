@@ -47,7 +47,7 @@ O sistema foi desenvolvido com **React + MUI**, utilizando **Firebase Firestore*
 
 - ✅ Cadastro de departamento
 - ✅ Edição de departamento
-- ✅ Definição de **gestor responsável** (colaborador com nível gestor)
+- ✅ Definição de **gestor responsável** (colaborador com nível gestor) 
 - ✅ Listagem de departamentos
 - ✅ Associação de colaboradores ao departamento
 - ✅ Adição de colaboradores existentes
